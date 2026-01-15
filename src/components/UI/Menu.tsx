@@ -12,15 +12,23 @@ export const Menu: React.FC = () => {
   }, [loadGame]);
 
   const handleStartGame = () => {
+    console.log('Game start button clicked');
     setCurrentStage(1);
+    console.log('Stage set to 1');
     setGameState('playing');
+    console.log('Game state set to playing');
   };
 
   const handleStageSelect = (stageId: StageId) => {
+    console.log('Stage select clicked:', stageId);
     const stage = stages.find((s) => s.id === stageId);
     if (stage?.unlocked) {
       setCurrentStage(stageId);
+      console.log('Stage set to:', stageId);
       setGameState('playing');
+      console.log('Game state set to playing');
+    } else {
+      console.log('Stage is locked:', stageId);
     }
   };
 

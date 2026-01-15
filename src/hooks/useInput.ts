@@ -114,9 +114,15 @@ export const useInput = () => {
   }, [updateInput]);
 
   const requestPointerLock = useCallback(() => {
+    // モバイル対応: ポインターロックが利用できない場合はスキップ
     const canvas = document.querySelector('canvas');
-    if (canvas && !isPointerLocked.current) {
-      canvas.requestPointerLock();
+    if (canvas && !isPointerLocked.current && 'requestPointerLock' in canvas) {
+      try {
+        canvas.requestPointerLock();
+        console.log('Pointer lock requested');
+      } catch (error) {
+        console.warn('Pointer lock not supported:', error);
+      }
     }
   }, []);
 
@@ -151,10 +157,13 @@ export const useInput = () => {
     handlePointerLockChange,
   ]);
 
-  // ゲーム状態が変わったらポインターロックを管理
+  // ゲーム状態が変わったらポインターロックを管理（モバイルでは任意）
   useEffect(() => {
     if (gameState === 'playing') {
-      requestPointerLock();
+      // モバイルでポインターロックが使えなくてもゲームは開始できる
+      setTimeout(() => {
+        requestPointerLock();
+      }, 100);
     } else {
       exitPointerLock();
     }

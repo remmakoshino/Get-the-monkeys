@@ -79,7 +79,11 @@ const createInitialSettings = (): GameSettings => ({
 export const useGameStore = create<GameStore>((set, get) => ({
   // ゲーム状態
   gameState: 'menu',
-  setGameState: (state: GameState) => set({ gameState: state }),
+  setGameState: (state: GameState) => {
+    console.log('setGameState called with:', state);
+    set({ gameState: state });
+    console.log('Game state updated to:', state);
+  },
   
   // ステージ情報
   currentStage: 1,

@@ -20,6 +20,8 @@ export const useCollision = () => {
     updatePlayer,
     monkeys,
     updateMonkey,
+    boss,
+    updateBoss,
     camera,
     updateCamera,
     input,
@@ -274,11 +276,47 @@ export const useCollision = () => {
         });
       }
     });
+
+    // ボスへの攻撃処理
+    if (boss && boss.state !== 'captured' && player.isAttacking) {
+      const distanceToBoss = player.position.distanceTo(boss.position);
+      if (distanceToBoss < GAME_CONFIG.PLAYER.ATTACK_RANGE * 1.5) { // ボスは判定が広め
+        const damage = player.currentTool === 'rod' ? 2 : 1; // ロッドならダメージ2倍
+        const newHealth = Math.max(0, boss.health - damage);
+        
+        useGameStore.getState().updateBoss({
+          health: newHealth,
+        });
+
+        // ボスヒットエフェクト
+        addEffect({
+          id: generateUniqueId(),
+          type: 'hit',
+          position: boss.position.clone().add(new THREE.Vector3(0, 2, 0)),
+          duration: 0.5,
+          elapsed: 0,
+          color: '#FFD700',
+        });
+
+        // ボス撃破チェック
+        if (newHealth <= 0) {
+          useGameStore.getState().updateBoss({
+            state: 'captured',
+          });
+          setNotification('ボス撃破！ステージクリア！');
+          setTimeout(() => {
+            handleStageClear();
+          }, 1000);
+        }
+      }
+    }
   }, [
     gameState,
     player,
     monkeys,
+    boss,
     updateMonkey,
+    updateBoss,
     updatePlayer,
     addEffect,
     setNotification,

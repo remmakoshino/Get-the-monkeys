@@ -184,8 +184,8 @@ export const checkMonkeyInteraction = (
     
     if (isAttacking) {
       if (currentTool === 'net' && distance < GAME_CONFIG.PLAYER.CAPTURE_RANGE) {
-        // ネットで捕獲（気絶中か体力0の場合）
-        if (monkey.state === 'stunned' || monkey.health <= 0) {
+        // ネットで捕獲（判定を緩和：気絶中、体力0、または体力が少ない場合）
+        if (monkey.state === 'stunned' || monkey.health <= 0 || monkey.health <= monkey.maxHealth * 0.5) {
           capturedId = monkey.id;
           break;
         }

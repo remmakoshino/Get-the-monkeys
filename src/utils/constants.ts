@@ -12,8 +12,8 @@ export const GAME_CONFIG = {
     DASH_DURATION: 0.3,
     DASH_COOLDOWN: 1.5,
     INVINCIBLE_DURATION: 1.5,
-    CAPTURE_RANGE: 2.5,
-    ATTACK_RANGE: 3,
+    CAPTURE_RANGE: 4.5, // 捕獲範囲を拡大（2.5 → 4.5）
+    ATTACK_RANGE: 4, // 攻撃範囲も拡大（3 → 4）
     ATTACK_DAMAGE: 1,
   },
   

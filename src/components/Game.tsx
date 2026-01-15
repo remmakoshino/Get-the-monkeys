@@ -12,6 +12,8 @@ import Boss, { createBossData } from './Boss';
 import HUD from './UI/HUD';
 import { Menu, PauseMenu, Tutorial } from './UI/Menu';
 import { Result, Notification, DamageFlash, LoadingScreen } from './UI/Result';
+import CaptureEffect from './UI/CaptureEffect';
+import BossBattleIntro from './UI/BossBattleIntro';
 import { spawnMonkey, generatePatrolPoints } from '../utils/AI';
 
 // ゲームシーン（3D部分）
@@ -107,8 +109,12 @@ const useGameInitialization = () => {
 
 // メインゲームコンポーネント
 const Game: React.FC = () => {
-  const { gameState, camera, player } = useGameStore();
+  const { gameState, camera, player, boss, monkeys } = useGameStore();
   const [webglSupported, setWebglSupported] = React.useState(true);
+  const [showCaptureEffect, setShowCaptureEffect] = React.useState(false);
+  const [showBossIntro, setShowBossIntro] = React.useState(false);
+  const previousCapturedCount = useRef(0);
+  const bossIntroShown = useRef(false);
   
   // WebGLサポートチェック
   useEffect(() => {
@@ -121,6 +127,30 @@ const Game: React.FC = () => {
       console.log('WebGL is supported');
     }
   }, []);
+
+  // 捕獲エフェクトの監視
+  useEffect(() => {
+    if (player.capturedMonkeys > previousCapturedCount.current) {
+      setShowCaptureEffect(true);
+      previousCapturedCount.current = player.capturedMonkeys;
+    }
+  }, [player.capturedMonkeys]);
+
+  // ボス戦イントロの監視
+  useEffect(() => {
+    const remainingMonkeys = monkeys.filter(m => m.state !== 'captured');
+    if (gameState === 'playing' && boss && remainingMonkeys.length === 0 && !bossIntroShown.current) {
+      setShowBossIntro(true);
+      bossIntroShown.current = true;
+    }
+  }, [boss, monkeys, gameState]);
+
+  // ゲーム状態変更時にボスイントロフラグをリセット
+  useEffect(() => {
+    if (gameState === 'menu') {
+      bossIntroShown.current = false;
+    }
+  }, [gameState]);
   
   // 入力処理
   useInput();
@@ -224,6 +254,19 @@ const Game: React.FC = () => {
       <Notification />
       <DamageFlash />
       <LoadingScreen />
+
+      {/* 捕獲エフェクト */}
+      <CaptureEffect 
+        show={showCaptureEffect} 
+        onComplete={() => setShowCaptureEffect(false)} 
+      />
+
+      {/* ボス戦イントロ */}
+      <BossBattleIntro
+        show={showBossIntro}
+        bossName={boss?.name || 'BOSS'}
+        onComplete={() => setShowBossIntro(false)}
+      />
 
       {/* タッチコントロール（モバイル用） */}
       {(gameState === 'playing' || gameState === 'paused') && (

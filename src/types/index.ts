@@ -296,7 +296,7 @@ export const MONKEY_STATS: Record<MonkeyType, Omit<MonkeyStats, 'type'>> = {
   yellow: {
     health: 1,
     maxHealth: 1,
-    speed: 4,
+    speed: 2.5, // 遅くしました（4 → 2.5）
     detectionRange: 8,
     color: '#FFD700',
     behavior: 'flee',
@@ -304,7 +304,7 @@ export const MONKEY_STATS: Record<MonkeyType, Omit<MonkeyStats, 'type'>> = {
   blue: {
     health: 1,
     maxHealth: 1,
-    speed: 7,
+    speed: 4.5, // 遅くしました（7 → 4.5）
     detectionRange: 10,
     color: '#4169E1',
     behavior: 'zigzag',
@@ -312,7 +312,7 @@ export const MONKEY_STATS: Record<MonkeyType, Omit<MonkeyStats, 'type'>> = {
   red: {
     health: 2,
     maxHealth: 2,
-    speed: 5,
+    speed: 3.5, // 遅くしました（5 → 3.5）
     detectionRange: 12,
     color: '#DC143C',
     behavior: 'attack',
@@ -320,7 +320,7 @@ export const MONKEY_STATS: Record<MonkeyType, Omit<MonkeyStats, 'type'>> = {
   green: {
     health: 2,
     maxHealth: 2,
-    speed: 3,
+    speed: 2, // 遅くしました（3 → 2）
     detectionRange: 6,
     color: '#228B22',
     behavior: 'hide',
@@ -328,7 +328,7 @@ export const MONKEY_STATS: Record<MonkeyType, Omit<MonkeyStats, 'type'>> = {
   black: {
     health: 4,
     maxHealth: 4,
-    speed: 6,
+    speed: 4, // 遅くしました（6 → 4）
     detectionRange: 15,
     color: '#2F2F2F',
     behavior: 'elite',

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, Suspense } from 'react';
+import React, { useEffect, useMemo, Suspense, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
@@ -165,43 +165,9 @@ const Game: React.FC = () => {
 
   return (
     <div className="game-container">
-      {/* デバッグ情報 */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        background: 'rgba(0,0,0,0.7)',
-        color: 'white',
-        padding: '10px',
-        fontSize: '12px',
-        zIndex: 9999,
-        pointerEvents: 'none'
-      }}>
-        <div>Game State: {gameState}</div>
-        <div>WebGL: {webglSupported ? 'OK' : 'NG'}</div>
-        <div>Screen: {window.innerWidth}x{window.innerHeight}</div>
-        <div>Canvas Render: {(gameState === 'playing' || gameState === 'paused') ? 'YES' : 'NO'}</div>
-      </div>
-
       {/* 3Dキャンバス */}
       {(gameState === 'playing' || gameState === 'paused') && (
-        <>
-          {/* テスト用の可視要素 */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'red',
-            color: 'white',
-            padding: '20px',
-            zIndex: 1,
-            pointerEvents: 'none'
-          }}>
-            Canvas Loading...
-          </div>
-          
-          <Canvas
+        <Canvas
             shadows
             camera={{
               position: cameraPosition,
@@ -245,7 +211,6 @@ const Game: React.FC = () => {
               <GameScene />
             </Suspense>
           </Canvas>
-        </>
       )}
 
       {/* UI レイヤー */}
@@ -261,15 +226,138 @@ const Game: React.FC = () => {
       <LoadingScreen />
 
       {/* タッチコントロール（モバイル用） */}
-      <div className="touch-controls">
-        <div className="virtual-joystick">
-          <div className="joystick-knob" />
-        </div>
+      {(gameState === 'playing' || gameState === 'paused') && (
+        <>
+          <TouchJoystick />
+          <TouchActionButtons />
+        </>
+      )}
+    </div>
+  );
+};
+
+// タッチジョイスティックコンポーネント
+const TouchJoystick: React.FC = () => {
+  const { updateInput } = useGameStore();
+  const joystickRef = useRef<HTMLDivElement>(null);
+  const knobRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = React.useState(false);
+  const touchId = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchId.current = touch.identifier;
+    setActive(true);
+    updateJoystickPosition(touch.clientX, touch.clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = Array.from(e.touches).find(t => t.identifier === touchId.current);
+    if (touch) {
+      updateJoystickPosition(touch.clientX, touch.clientY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchId.current = null;
+    setActive(false);
+    updateInput({ forward: false, backward: false, left: false, right: false });
+    if (knobRef.current) {
+      knobRef.current.style.transform = 'translate(-50%, -50%)';
+    }
+  };
+
+  const updateJoystickPosition = (touchX: number, touchY: number) => {
+    if (!joystickRef.current || !knobRef.current) return;
+
+    const rect = joystickRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const deltaX = touchX - centerX;
+    const deltaY = touchY - centerY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const maxDistance = rect.width / 2 - 30;
+
+    const clampedDistance = Math.min(distance, maxDistance);
+    const angle = Math.atan2(deltaY, deltaX);
+
+    const knobX = Math.cos(angle) * clampedDistance;
+    const knobY = Math.sin(angle) * clampedDistance;
+
+    knobRef.current.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+
+    // 入力状態を更新
+    const threshold = maxDistance * 0.3;
+    const normalizedX = deltaX / maxDistance;
+    const normalizedY = deltaY / maxDistance;
+
+    updateInput({
+      forward: normalizedY < -threshold / maxDistance,
+      backward: normalizedY > threshold / maxDistance,
+      left: normalizedX < -threshold / maxDistance,
+      right: normalizedX > threshold / maxDistance,
+    });
+  };
+
+  return (
+    <div className="touch-controls">
+      <div 
+        ref={joystickRef}
+        className="virtual-joystick"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ opacity: active ? 1 : 0.7 }}
+      >
+        <div ref={knobRef} className="joystick-knob" />
       </div>
-      <div className="action-buttons">
-        <button className="action-btn">🎯</button>
-        <button className="action-btn">⚡</button>
-      </div>
+    </div>
+  );
+};
+
+// タッチアクションボタンコンポーネント
+const TouchActionButtons: React.FC = () => {
+  const { updateInput, updatePlayer } = useGameStore();
+
+  const handleAttack = () => {
+    updateInput({ attack: true });
+    updatePlayer({ isAttacking: true });
+    console.log('Attack button pressed');
+    setTimeout(() => {
+      updateInput({ attack: false });
+      updatePlayer({ isAttacking: false });
+    }, 100);
+  };
+
+  const handleJump = () => {
+    updateInput({ jump: true });
+    console.log('Jump button pressed');
+    setTimeout(() => {
+      updateInput({ jump: false });
+    }, 100);
+  };
+
+  return (
+    <div className="action-buttons">
+      <button 
+        className="action-btn jump" 
+        onTouchStart={(e) => {
+          e.preventDefault();
+          handleJump();
+        }}
+      >
+        ⬆️
+      </button>
+      <button 
+        className="action-btn"
+        onTouchStart={(e) => {
+          e.preventDefault();
+          handleAttack();
+        }}
+      >
+        🎯
+      </button>
     </div>
   );
 };

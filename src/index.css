@@ -113,6 +113,15 @@ html, body, #root {
   background: rgba(0, 0, 0, 0.7);
   padding: 10px 20px;
   border-radius: 15px;
+  z-index: 200;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .tool-bar {
+    bottom: 200px;
+    padding: 12px 15px;
+    gap: 8px;
+  }
 }
 
 .tool-item {
@@ -128,11 +137,26 @@ html, body, #root {
   cursor: pointer;
   transition: all 0.2s ease;
   color: white;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .tool-item {
+    width: 55px;
+    height: 55px;
+  }
 }
 
 .tool-item:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
+}
+
+.tool-item:active {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.95);
 }
 
 .tool-item.active {
@@ -145,10 +169,22 @@ html, body, #root {
   font-size: 24px;
 }
 
+@media (max-width: 768px), (pointer: coarse) {
+  .tool-icon {
+    font-size: 28px;
+  }
+}
+
 .tool-key {
   font-size: 10px;
   margin-top: 4px;
   opacity: 0.7;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .tool-key {
+    display: none;
+  }
 }
 
 /* Minimap */
@@ -162,6 +198,17 @@ html, body, #root {
   border-radius: 50%;
   border: 3px solid rgba(255, 255, 255, 0.5);
   overflow: hidden;
+  z-index: 150;
+}
+
+@media (max-width: 768px), (pointer: coarse) {
+  .minimap {
+    width: 100px;
+    height: 100px;
+    bottom: 200px;
+    left: 20px;
+    border-width: 2px;
+  }
 }
 
 .minimap-inner {
@@ -388,71 +435,99 @@ html, body, #root {
   margin-top: 20px;
 }
 
-/* Touch Controls */
+/* Touch Controls for Mobile */
 .touch-controls {
   position: absolute;
-  bottom: 20px;
-  left: 20px;
+  bottom: 30px;
+  left: 30px;
   display: none;
+  z-index: 500;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) {
   .touch-controls {
     display: block;
   }
 }
 
 .virtual-joystick {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.2);
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 3px solid rgba(255, 255, 255, 0.4);
   position: relative;
+  touch-action: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .joystick-knob {
-  width: 50px;
-  height: 50px;
-  background: rgba(255, 255, 255, 0.6);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  transition: all 0.1s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  pointer-events: none;
 }
 
 .action-buttons {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 30px;
+  right: 30px;
   display: none;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 500;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (pointer: coarse) {
   .action-buttons {
     display: flex;
-    gap: 10px;
   }
   
   .tool-bar {
-    bottom: 100px;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
 .action-btn {
-  width: 70px;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.3);
-  border: none;
+  width: 75px;
+  height: 75px;
+  background: rgba(74, 144, 226, 0.8);
+  border: 3px solid rgba(255, 255, 255, 0.6);
   border-radius: 50%;
   color: white;
-  font-size: 24px;
+  font-size: 32px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  touch-action: none;
+  user-select: none;
 }
 
 .action-btn:active {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(74, 144, 226, 1);
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.action-btn.jump {
+  background: rgba(92, 184, 92, 0.8);
+}
+
+.action-btn.jump:active {
+  background: rgba(92, 184, 92, 1);
 }
 
 /* Instructions Panel */

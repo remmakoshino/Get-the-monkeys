@@ -13,12 +13,18 @@ const TOOL_ICONS: Record<ToolType, string> = {
 };
 
 export const HUD: React.FC = () => {
-  const { player, monkeys, gameTime, boss, currentStage, stages } = useGameStore();
+  const { player, monkeys, gameTime, boss, currentStage, stages, updatePlayer } = useGameStore();
 
   const stageInfo = stages.find((s) => s.id === currentStage);
   const capturedCount = monkeys.filter((m) => m.state === 'captured').length;
   const totalMonkeys = monkeys.length;
   const healthPercent = (player.health / player.maxHealth) * 100;
+
+  // ツール切り替えハンドラー
+  const handleToolSelect = (toolType: ToolType) => {
+    updatePlayer({ currentTool: toolType });
+    console.log('Tool selected:', toolType);
+  };
 
   return (
     <div className="hud">
@@ -68,6 +74,11 @@ export const HUD: React.FC = () => {
             key={tool.type}
             className={`tool-item ${player.currentTool === tool.type ? 'active' : ''}`}
             title={tool.description}
+            onClick={() => handleToolSelect(tool.type)}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleToolSelect(tool.type);
+            }}
           >
             <span className="tool-icon">{TOOL_ICONS[tool.type]}</span>
             <span className="tool-key">{index + 1}</span>

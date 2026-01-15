@@ -165,43 +165,87 @@ const Game: React.FC = () => {
 
   return (
     <div className="game-container">
+      {/* デバッグ情報 */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        background: 'rgba(0,0,0,0.7)',
+        color: 'white',
+        padding: '10px',
+        fontSize: '12px',
+        zIndex: 9999,
+        pointerEvents: 'none'
+      }}>
+        <div>Game State: {gameState}</div>
+        <div>WebGL: {webglSupported ? 'OK' : 'NG'}</div>
+        <div>Screen: {window.innerWidth}x{window.innerHeight}</div>
+        <div>Canvas Render: {(gameState === 'playing' || gameState === 'paused') ? 'YES' : 'NO'}</div>
+      </div>
+
       {/* 3Dキャンバス */}
       {(gameState === 'playing' || gameState === 'paused') && (
-        <Canvas
-          shadows
-          camera={{
-            position: cameraPosition,
-            fov: 75,
-            near: 0.1,
-            far: 1000,
-          }}
-          onCreated={({ camera: cam, gl }) => {
-            cam.lookAt(...cameraLookAt);
-            // モバイル対応: WebGLの設定
-            gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            console.log('Canvas created', { 
-              width: gl.domElement.width, 
-              height: gl.domElement.height,
-              devicePixelRatio: window.devicePixelRatio 
-            });
-          }}
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            display: 'block',
-            background: '#1a1a2e',
-            touchAction: 'none'
-          }}
-          gl={{ 
-            antialias: true, 
-            alpha: false,
-            powerPreference: 'high-performance'
-          }}
-        >
-          <Suspense fallback={null}>
-            <GameScene />
-          </Suspense>
-        </Canvas>
+        <>
+          {/* テスト用の可視要素 */}
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: 'red',
+            color: 'white',
+            padding: '20px',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}>
+            Canvas Loading...
+          </div>
+          
+          <Canvas
+            shadows
+            camera={{
+              position: cameraPosition,
+              fov: 75,
+              near: 0.1,
+              far: 1000,
+            }}
+            onCreated={({ camera: cam, gl, size }) => {
+              cam.lookAt(...cameraLookAt);
+              // モバイル対応: WebGLの設定
+              gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+              console.log('Canvas created', { 
+                canvasWidth: gl.domElement.width, 
+                canvasHeight: gl.domElement.height,
+                sizeWidth: size.width,
+                sizeHeight: size.height,
+                devicePixelRatio: window.devicePixelRatio,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                glInfo: gl.getContextAttributes()
+              });
+            }}
+            style={{ 
+              width: '100vw', 
+              height: '100vh',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              display: 'block',
+              background: '#1a1a2e',
+              touchAction: 'none',
+              zIndex: 10
+            }}
+            gl={{ 
+              antialias: false,
+              alpha: false,
+              powerPreference: 'high-performance',
+              preserveDrawingBuffer: true
+            }}
+          >
+            <Suspense fallback={null}>
+              <GameScene />
+            </Suspense>
+          </Canvas>
+        </>
       )}
 
       {/* UI レイヤー */}

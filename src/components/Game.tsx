@@ -108,6 +108,19 @@ const useGameInitialization = () => {
 // メインゲームコンポーネント
 const Game: React.FC = () => {
   const { gameState, camera, player } = useGameStore();
+  const [webglSupported, setWebglSupported] = React.useState(true);
+  
+  // WebGLサポートチェック
+  useEffect(() => {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      setWebglSupported(false);
+      console.error('WebGL is not supported on this device');
+    } else {
+      console.log('WebGL is supported');
+    }
+  }, []);
   
   // 入力処理
   useInput();
@@ -115,6 +128,11 @@ const Game: React.FC = () => {
   
   // ゲーム初期化
   useGameInitialization();
+
+  // デバッグ用: ゲーム状態をログ出力
+  useEffect(() => {
+    console.log('Game state changed:', gameState);
+  }, [gameState]);
 
   // カメラ位置の計算
   const cameraPosition = useMemo((): [number, number, number] => {
@@ -124,6 +142,26 @@ const Game: React.FC = () => {
   const cameraLookAt = useMemo((): [number, number, number] => {
     return [player.position.x, player.position.y + 1, player.position.z];
   }, [player.position]);
+
+  // WebGL非対応の場合
+  if (!webglSupported) {
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        color: 'white',
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <h2>⚠️ WebGLが利用できません</h2>
+        <p>このゲームを遊ぶにはWebGLに対応したブラウザが必要です。</p>
+      </div>
+    );
+  }
 
   return (
     <div className="game-container">
@@ -137,10 +175,28 @@ const Game: React.FC = () => {
             near: 0.1,
             far: 1000,
           }}
-          onCreated={({ camera: cam }) => {
+          onCreated={({ camera: cam, gl }) => {
             cam.lookAt(...cameraLookAt);
+            // モバイル対応: WebGLの設定
+            gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            console.log('Canvas created', { 
+              width: gl.domElement.width, 
+              height: gl.domElement.height,
+              devicePixelRatio: window.devicePixelRatio 
+            });
           }}
-          style={{ background: '#1a1a2e' }}
+          style={{ 
+            width: '100%', 
+            height: '100%', 
+            display: 'block',
+            background: '#1a1a2e',
+            touchAction: 'none'
+          }}
+          gl={{ 
+            antialias: true, 
+            alpha: false,
+            powerPreference: 'high-performance'
+          }}
         >
           <Suspense fallback={null}>
             <GameScene />

@@ -32,7 +32,7 @@ const MainMenu: React.FC<{
           marginBottom: '10px',
           animation: 'titleBounce 2s ease-in-out infinite',
         }}>
-          🐵 ピポサルGET! 🐵
+          🐵 モンキーGET! 🐵
         </h1>
         <p style={{
           fontSize: 'clamp(12px, 3vw, 20px)',
@@ -133,7 +133,7 @@ const MainMenu: React.FC<{
               color: '#CCCCFF',
               fontFamily: 'inherit',
             }}>
-              ピポサルレーサー！
+              モンキーレーサー！
             </div>
           </div>
         </button>
@@ -146,7 +146,7 @@ const MainMenu: React.FC<{
         fontSize: '12px',
         color: 'rgba(255, 255, 255, 0.5)',
       }}>
-        © 2024 ピポサルGET!
+        © 2026 モンキーGET!
       </div>
 
       {/* アニメーション用スタイル */}
